@@ -17,6 +17,11 @@ ezButton upButton(10);
 ezButton downButton(5);
 ezButton actionButton(11);
 
+typedef struct {
+  char* note;
+  float freq;
+} noteFreq;
+
 // Pitch of each step (in Hz)
 int stepPitches[] = { 220, 249.94, 329.63, 329.63, 329.63, 587.33, 880, 440 };
 
@@ -25,6 +30,26 @@ bool toneState[] = { 1, 0, 0, 0, 0, 0, 0, 0 };
 
 //Frequencies (in Hz) of A Minor Scale
 int freqArray[] = { 220, 249.94, 261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880 };
+
+noteFreq notes[] = {
+  { "A3", 220 },
+  { "B3", 249.94 },
+  { "C4", 261.94},
+  { "D4", 293.66},
+  { "E4", 329.63},
+  { "F4", 349.23},
+  { "G4", 392},
+  { "A4", 440},
+  { "B4", 493.88},
+  { "C5", 523.25},
+  { "D5", 587.33},
+  { "E5", 659.25},
+  { "F5", 698.25},
+  { "G5", 783.99},
+  { "A5", 880}
+  //TODO add the rest of the notes and frequences
+};
+
 
 //Tempo in Millis.
 int intervalArray[] = {375, 300, 250, 214, 188 };
@@ -61,7 +86,7 @@ void setup() {
   u8g.setRot180();
 
   // Initialize serial communication
-  //Serial.begin(9600);
+  Serial.begin(9600);
 
   // Setup encoder pins
   pinMode(encoderPinA, INPUT_PULLUP);
@@ -103,7 +128,7 @@ if (toneState[editStep] == 0){
           toneState[editStep] = 0;
         }
         
-        //This part doesn't work........ might be hardware
+        //This part doesn't work........ 
 int intervalCount = intervalArray[intervalCount];
 if (encButton.isPressed())
 intervalCount = intervalCount + 1;
@@ -160,7 +185,7 @@ void draw(void) {
   
 u8g.setColorIndex(1);
   u8g.setPrintPos(10, 50);
-  u8g.print(stepPitches[editStep]);
+  u8g.print(notes[freq].note);
   if (toneState[editStep] == 1) {
     u8g.drawStr(50, 50, "On");
   } else {
@@ -168,18 +193,28 @@ u8g.setColorIndex(1);
   }
   u8g.setPrintPos(80,50);
 u8g.print(interval);
+
+Serial.println(stepPitches[step]);
 }
+
+
 
 void knob() {
   currentStateCLK = digitalRead(encoderPinA);
+  //freq = stepPitches[freq].freq;
   if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
     if (digitalRead(encoderPinB) != currentStateCLK) {
       freq = freq - 1;
     } else {
       freq = freq + 1;
     }
-    freq = constrain(freq, 0, 14);
-    stepPitches[editStep] = freqArray[freq];
+    if(freq > 14){
+      freq = 0;
+    } else if (freq < 0){
+      freq = 14;
+    }
+    //freq = constrain(freq, 0, 14);
+    stepPitches[editStep] = notes[freq].freq;
   }
   lastStateCLK = currentStateCLK;
 }
