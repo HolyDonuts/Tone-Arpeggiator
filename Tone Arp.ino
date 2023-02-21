@@ -5,6 +5,11 @@ const int encoderButton = 5;
 // Piezo buzzer pin
 const int buzzerPin = 6;
 
+typedef struct {
+  char* note;
+  float freq;
+} noteFreq;
+
 // Pitch of each step (in Hz)
 //int pitch[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int pitch[] = { 220, 261.63, 329.63, 523.25, 329.63, 587.33, 880 , 440 };
@@ -12,6 +17,12 @@ int pitch[] = { 220, 261.63, 329.63, 523.25, 329.63, 587.33, 880 , 440 };
 //Frequencies (in Hz) of A Minor Scale
 float freqArray[] = { 220, 249.94, 261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880 };
 //Equivalent Note      A3    B3      C4     D4       E4      F4     G4   A4    B4      C5      D5      E5      F5      G5     A5
+
+noteFreq notes[] = {
+  { "A3", 220 },
+  { "B3", 249.94 }  
+  //TODO add the rest of the notes and frequences
+};
 
 //Tempo in Millis.
 long intervalArray[] = {375, 300, 250, 214, 188};
@@ -97,7 +108,7 @@ void loop() {
         freq = freq + 1;
       }
       freq = constrain(freq, 0, 14);
-      pitch[editStep] = freqArray[freq];
+      pitch[editStep] = notes[freq].freq;
     }
     lastStateCLK = currentStateCLK;
   } 
@@ -135,7 +146,15 @@ void loop() {
   Serial.print("  -  ");
   Serial.print("Step Freqs: ");
   for (int x = 0; x <= 7; x++) {
+
     Serial.print(pitch[x]);
+
+    for(int j = 0; j < 2; j++){
+      if(notes[j].freq == pitch[x]) {
+        Serial.print(" ");
+        Serial.print(notes[j].note);
+      }     
+    }    
     Serial.print(" - ");
   }
   Serial.println(" ");
