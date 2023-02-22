@@ -4,7 +4,7 @@
 // Set LCD Pins
 U8GLIB_SH1106_128X64 u8g(6, 7, 9, 8);  // SCK, MOSI, CS, DS
 
-// Rotary encoder 
+// Rotary encoder
 const int encoderPinA = 2;
 const int encoderPinB = 3;
 ezButton encButton(4);
@@ -31,30 +31,30 @@ bool toneState[] = { 1, 0, 0, 0, 0, 0, 0, 0 };
 //Frequencies (in Hz) of A Minor Scale
 int freqArray[] = { 220, 249.94, 261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25, 587.33, 659.25, 698.46, 783.99, 880 };
 
-int freqState[] = {0,0,0,0,0,0,0,0}; 
+int freqState[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 noteFreq notes[] = {
   { "A3", 220 },
   { "B3", 249.94 },
-  { "C4", 261.94},
-  { "D4", 293.66},
-  { "E4", 329.63},
-  { "F4", 349.23},
-  { "G4", 392},
-  { "A4", 440},
-  { "B4", 493.88},
-  { "C5", 523.25},
-  { "D5", 587.33},
-  { "E5", 659.25},
-  { "F5", 698.25},
-  { "G5", 783.99},
-  { "A5", 880}
+  { "C4", 261.94 },
+  { "D4", 293.66 },
+  { "E4", 329.63 },
+  { "F4", 349.23 },
+  { "G4", 392 },
+  { "A4", 440 },
+  { "B4", 493.88 },
+  { "C5", 523.25 },
+  { "D5", 587.33 },
+  { "E5", 659.25 },
+  { "F5", 698.25 },
+  { "G5", 783.99 },
+  { "A5", 880 }
   //TODO add the rest of the notes and frequences
 };
 
 
 //Tempo in Millis.
-int intervalArray[] = {375, 300, 250, 214, 188 };
+int intervalArray[] = { 375, 300, 250, 214, 188 };
 //Equivalent BPM's      80  100  120  140  160
 
 //Step Numbers for LCD Printing
@@ -83,7 +83,7 @@ void setup() {
   downButton.setDebounceTime(50);
   actionButton.setDebounceTime(50);
   encButton.setDebounceTime(50);
-  
+
   //Setup screen rotation
   u8g.setRot180();
 
@@ -103,45 +103,45 @@ void setup() {
   //Attach encoder interrupt
   attachInterrupt(digitalPinToInterrupt(encoderPinA), knob, CHANGE);
 
-  for (int stepPitch = 0; stepPitch < 7; stepPitch++){
-    freqState[stepPitch] = stepPitches[stepPitch]; 
+  for (int stepPitch = 0; stepPitch < 7; stepPitch++) {
+    freqState[stepPitch] = stepPitches[stepPitch];
   }
- 
 }
 
 
 void loop() {
 
-upButton.loop();
-downButton.loop();
-actionButton.loop();
+  upButton.loop();
+  downButton.loop();
+  actionButton.loop();
 
-if (upButton.isPressed())
-editStep = editStep + 1;
-      if (editStep > 7) {
-        editStep = 0;
-      }
+  if (upButton.isPressed())
+    editStep = editStep + 1;
+  if (editStep > 7) {
+    editStep = 0;
+  }
 
-if (downButton.isPressed())
-editStep = editStep - 1;
-      if (editStep < 0) {
-        editStep = 7;
-      }
+  if (downButton.isPressed())
+    editStep = editStep - 1;
+    
+  if (editStep < 0) {
+    editStep = 7;
+  }
 
-if(actionButton.isPressed())
-if (toneState[editStep] == 0){
-    toneState[editStep] = 1;
-      } else {
-          toneState[editStep] = 0;
-        }
-        
-        //This part doesn't work........ 
-int intervalCount = intervalArray[intervalCount];
-if (encButton.isPressed())
-intervalCount = intervalCount + 1;
-      if (intervalCount > 4) {
-        intervalCount = 0;
-      }
+  if (actionButton.isPressed())
+    if (toneState[editStep] == 0) {
+      toneState[editStep] = 1;
+    } else {
+      toneState[editStep] = 0;
+    }
+
+  //This part doesn't work........
+  int intervalCount = intervalArray[intervalCount];
+  if (encButton.isPressed())
+    intervalCount = intervalCount + 1;
+  if (intervalCount > 4) {
+    intervalCount = 0;
+  }
   interval = intervalArray[intervalCount];
 
 
@@ -160,7 +160,7 @@ intervalCount = intervalCount + 1;
     previousTime = currentTime;
   }
 
-  
+
 
   // picture loop
   u8g.firstPage();
@@ -179,20 +179,20 @@ void draw(void) {
     u8g.print(displayStepNo[h]);
     if (h == editStep) {
       u8g.setColorIndex(1);
-      u8g.drawBox(displayStepPos[editStep] - 2,18,12,15);
+      u8g.drawBox(displayStepPos[editStep] - 2, 18, 12, 15);
       u8g.setColorIndex(0);
       u8g.setPrintPos(displayStepPos[editStep], 30);
       u8g.print(displayStepNo[editStep]);
       //u8g.drawFrame(displayStepPos[editStep] - 2, 18, 12, 15);
     }
-    if (h == step){
+    if (h == step) {
       u8g.setColorIndex(1);
-    u8g.drawLine(displayStepPos[step] - 3, 35, displayStepPos[step] + 8, 35);  
-    } 
+      u8g.drawLine(displayStepPos[step] - 3, 35, displayStepPos[step] + 8, 35);
     }
+  }
 
 
-    //THESE 3 LINES ARE THE PART THAT PRINTS THE NOTE ON SCREEN. u8g.print(notes[freq].note) needs to update every time you change step to show the note on the current step, not the last changed value. 
+  //THESE 3 LINES ARE THE PART THAT PRINTS THE NOTE ON SCREEN. u8g.print(notes[freq].note) needs to update every time you change step to show the note on the current step, not the last changed value.
   u8g.setColorIndex(1);
   u8g.setPrintPos(10, 50);
   u8g.print(notes[freq].note);
@@ -205,25 +205,24 @@ void draw(void) {
     u8g.drawStr(50, 50, "Off");
   }
 
-u8g.setPrintPos(80,50);
-u8g.print(interval);
-
+  u8g.setPrintPos(80, 50);
+  u8g.print(interval);
 }
 
 
 
 void knob() {
   currentStateCLK = digitalRead(encoderPinA);
-  
+
   if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
     if (digitalRead(encoderPinB) != currentStateCLK) {
-      freqState[editStep] = freqState[editStep] - 1 ;
+      freqState[editStep] = freqState[editStep] - 1;
     } else {
-      freqState[editStep] = freqState[editStep] + 1 ;
-         }
-    if(freqState[editStep] > 14){
+      freqState[editStep] = freqState[editStep] + 1;
+    }
+    if (freqState[editStep] > 14) {
       freqState[editStep] = 0;
-    } else if (freqState[editStep] < 0){
+    } else if (freqState[editStep] < 0) {
       freqState[editStep] = 14;
     }
     freq = freqState[editStep];
@@ -231,5 +230,4 @@ void knob() {
   }
 
   lastStateCLK = currentStateCLK;
-  
 }
