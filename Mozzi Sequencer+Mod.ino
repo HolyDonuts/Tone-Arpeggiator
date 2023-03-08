@@ -5,7 +5,6 @@
 #include <tables/sin2048_int8.h> // sine table for oscillator
 #include <EventDelay.h>
 #include <tables/envelop2048_uint8.h>
-
 #include <ezButton.h>
 
 // Rotary encoder
@@ -14,12 +13,9 @@ const int encoderPinB = 3;
 
 // use: Oscil <table_size, update_rate> oscilName (wavetable), look in .h file of table #included above
 Oscil<SIN2048_NUM_CELLS, AUDIO_RATE> aSin(SIN2048_DATA);
-Oscil <SIN2048_NUM_CELLS, AUDIO_RATE> aCarrier(SIN2048_DATA);
 Oscil <SIN2048_NUM_CELLS, AUDIO_RATE> aModulator(SIN2048_DATA);
-Oscil <SIN2048_NUM_CELLS, AUDIO_RATE> aModWidth(SIN2048_DATA);
-Oscil <SIN2048_NUM_CELLS, CONTROL_RATE> kModFreq1(SIN2048_DATA);
-Oscil <SIN2048_NUM_CELLS, CONTROL_RATE> kModFreq2(SIN2048_DATA);
 Oscil <ENVELOP2048_NUM_CELLS, AUDIO_RATE> aEnvelop(ENVELOP2048_DATA);
+
 
 // use #define for CONTROL_RATE, not a constant
 #define CONTROL_RATE 640 // Hz, powers of 2 are most reliable
@@ -61,14 +57,14 @@ noteFreq notes[] = {
 
 
 note stepPitches[8] = {
-    {notes[0], 250},
-    {notes[3], 500},
-    {notes[5], 250},
+    {notes[5], 500},
     {notes[7], 250},
-    {notes[9], 100},
-    {notes[11], 100},
-    {notes[13], 250},
-    {notes[14], 250}
+    {notes[6], 750},
+    {notes[5], 125},
+    {notes[3], 500},
+    {notes[2], 125},
+    {notes[3], 750},
+    {notes[4], 1000}
 };
 
 
@@ -103,14 +99,10 @@ void setup()
   actionButton.setDebounceTime(100);
   startMozzi(CONTROL_RATE); // :)
   aSin.setFreq(261.63f);    // set the frequency
-  aCarrier.setFreq(220);
-  kModFreq1.setFreq(1.78f);
-  kModFreq2.setFreq(0.1757f);
-  aModWidth.setFreq(0.1434f);
-  aEnvelop.setFreq(9.0f);
   Serial.begin(9600);
   stepTime.start(stepTimeMs);
   noteTime.start(1000);
+
 
   m = millis();
 
@@ -130,17 +122,14 @@ bool isPaused = false;
 
 void updateControl()
 {
-
-  
   knob();
   checkButtons();
-  
 }
 
 AudioOutput_t updateAudio()
 {
-  int asig = aCarrier.phMod((int)aModulator.next()*(260u+aModWidth.next()));
-  return MonoOutput::from16Bit(aSin.next() * asig*(byte)aEnvelop.next() * gain); // return an int signal centred around 0
+  long mod2 = (128u+ aModulator.next());
+  return MonoOutput::fromNBit(16, mod2 * aSin.next());
 }
 
 void loop()
@@ -167,16 +156,17 @@ void knob() {
   }
 
   lastStateCLK = currentStateCLK;
+  
   } else if (btnState == 0){
-    modFreq = 0;
     if (currentStateCLK != lastStateCLK && currentStateCLK == 1) {
     if (digitalRead(encoderPinB) != currentStateCLK) {
-      modFreq = modFreq - 50;
+      modFreq = modFreq - 1;
     } else {
-      modFreq = modFreq + 50;
+      modFreq = modFreq + 1;
     }
-    aModulator.setFreq(modFreq*kModFreq1.next() + kModFreq2.next());
+    aModulator.setFreq(modFreq);
     //stepPitches[editStep].noteTime = modFreq;
+    Serial.println(modFreq);
   }
 modFreq = constrain(modFreq, 0, 1000);
   lastStateCLK = currentStateCLK;
